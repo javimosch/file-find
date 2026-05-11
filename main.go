@@ -1,6 +1,5 @@
 package main
-import ("fmt";"os";"path/filepath";"strings";"time")
-const timeFormat = "2006-01-02T15:04:05Z07:00"
+import ("fmt";"os";"path/filepath";"strings")
 func main() {
 	root := "."; pattern := ""
 	if len(os.Args) > 1 { root = os.Args[1] }
@@ -10,15 +9,14 @@ func main() {
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil { return nil }
 		if info.IsDir() { return nil }
-		if pattern != "" && !strings.Contains(info.Name(), pattern) && !match(pattern, info.Name()) { return nil }
+		if pattern != "" && !strings.Contains(info.Name(), pattern) && !globMatch(pattern, info.Name()) { return nil }
 		if !first { fmt.Println(",") }; first = false
-		fmt.Printf(`{"file":"%s","size":%d,"mode":"%s","mod_time":"%s"}`,
-			path, info.Size(), info.Mode().String(), info.ModTime().Format(timeFormat))
+		fmt.Printf(`{"file":"%s","size":%d,"mode":"%s"}`, path, info.Size(), info.Mode().String())
 		return nil
 	})
 	fmt.Println("\n]")
 }
-func match(pattern, name string) bool {
+func globMatch(pattern, name string) bool {
 	if !strings.Contains(pattern, "*") { return strings.HasPrefix(name, pattern) }
 	parts := strings.Split(pattern, "*")
 	if len(parts) == 1 { return strings.HasPrefix(name, parts[0]) }
